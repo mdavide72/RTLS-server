@@ -1,0 +1,57 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List, Optional
+from datetime import datetime
+
+app = FastAPI()
+
+# Modello Pydantic per rappresentare la struttura del JSON di risposta
+class Position(BaseModel):
+    X: float
+    Y: float
+    Z: float
+    Altitude: int
+    Orientation: int
+
+class Beacon(BaseModel):
+    Id: str
+    Name: Optional[str] = None
+    Position: Position
+    Color: str
+    Enabled: int
+    Type: int
+    Battery: int
+    InsertDate: datetime
+    LastSeen: datetime
+
+# Mock dei dati che vogliamo restituire
+mock_beacon_data = [
+    Beacon(
+        Id="beacon001",
+        Name=None,
+        Position=Position(
+            X=94.65357144145366,
+            Y=399.7747098363958,
+            Z=0,
+            Altitude=0,
+            Orientation=-1
+        ),
+        Color="#0093a3",
+        Enabled=1,
+        Type=0,
+        Battery=0,
+        InsertDate=datetime.fromisoformat("2021-02-11T12:19:35.197"),
+        LastSeen=datetime.fromisoformat("2021-02-11T12:19:35.197")
+    )
+]
+
+@app.get("/beacons", response_model=List[Beacon])
+async def get_beacons(id: Optional[str] = None):
+    # Verifica dell'ID (qui l'ID è ignorato perché restituiamo un solo set di dati)
+    if id == "12345":
+        return mock_beacon_data
+    else:
+        raise HTTPException(status_code=404, detail="Beacon not found")
+
+# Avvio del server (eseguire questo codice solo in locale, non all'interno di FastAPI nativamente)
+# uvicorn.run(app, host="0.0.0.0", port=8000)
